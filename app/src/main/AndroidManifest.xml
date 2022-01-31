@@ -12,12 +12,15 @@
         <activity
             android:name=".MainActivity"
             android:exported="true">
+            <!-- Only one Activity in our app needs this "special" <intent-filter> tag, which indicates the "first" screen of our app to show when the app launches -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".TweetsActivity" />
+
     </application>
 
 </manifest>
