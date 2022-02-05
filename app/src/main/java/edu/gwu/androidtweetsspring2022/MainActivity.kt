@@ -1,6 +1,8 @@
 package edu.gwu.androidtweetsspring2022
 
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -32,6 +34,9 @@ class MainActivity : AppCompatActivity() {
         // Tells Android which layout file should be used for this screen.
         setContentView(R.layout.activity_main)
 
+        val sharedPrefs: SharedPreferences =
+            getSharedPreferences("android-tweets", Context.MODE_PRIVATE)
+
         // Equivalent of a System.out.println (Android has different logging levels to organize logs -- .d is for DEBUG)
         // First parameter = the "tag" allows you to find related logging statements easier (e.g. all logs in the MainActivity)
         // Second parameter = the actual text you want to log
@@ -57,6 +62,14 @@ class MainActivity : AppCompatActivity() {
         //
         // This code block will run when the button is clicked (assuming the button is enabled).
         login.setOnClickListener { view: View ->
+            val inputtedUsername: String = username.text.toString()
+
+            // Save the username to SharedPreferences
+            sharedPrefs
+                .edit()
+                .putString("USERNAME", inputtedUsername)
+                .apply()
+
             progressBar.visibility = View.VISIBLE
 
             // An Intent is used to start a new Activity.
@@ -74,6 +87,12 @@ class MainActivity : AppCompatActivity() {
         // Using the same TextWatcher instance for both EditTexts so the same block of code runs on each character.
         username.addTextChangedListener(textWatcher)
         password.addTextChangedListener(textWatcher)
+
+
+        // Restore the saved username from SharedPreferences and display it to the user when the screen loads.
+        // Default to the empty string if there is no saved username.
+        val savedUsername = sharedPrefs.getString("USERNAME", "")
+        username.setText(savedUsername)
     }
 
     // Another example of explicitly implementing an interface (TextWatcher). We cannot use
