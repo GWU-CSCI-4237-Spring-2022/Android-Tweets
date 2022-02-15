@@ -9,18 +9,31 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AndroidTweetsSpring2022">
+
+        <activity
+            android:name=".MapsActivity"
+            android:exported="false"
+            android:label="@string/title_activity_maps" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
+
             <!-- Only one Activity in our app needs this "special" <intent-filter> tag, which indicates the "first" screen of our app to show when the app launches -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity android:name=".TweetsActivity" />
 
+        <!-- Normally the "AIza..." key would be part of local.properties or a Strings.xml file, as
+             the instructions state. Hardcoding it in this file is an easy way for me to share the key
+             with everyone to make the lecture app accessible to the class. -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyDjr0LkEJYjmZu4vYU1Ql2tZ9NLwWptdLM" />
     </application>
 
 </manifest>
