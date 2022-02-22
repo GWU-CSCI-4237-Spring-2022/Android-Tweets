@@ -84,3 +84,7 @@ lint/generated/
 lint/outputs/
 lint/tmp/
 lint/reports/
+
+# Normally, you would avoid checking in API keys into GitHub
+# In this case I'm doing it to make it easier to access the lecture app
+# api_keys.xml
