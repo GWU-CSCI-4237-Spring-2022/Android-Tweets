@@ -1,11 +1,13 @@
 package edu.gwu.androidtweetsspring2022
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Picasso
 
 class TweetAdapter(val tweets: List<Tweet>) : RecyclerView.Adapter<TweetAdapter.ViewHolder>() {
 
@@ -45,7 +47,14 @@ class TweetAdapter(val tweets: List<Tweet>) : RecyclerView.Adapter<TweetAdapter.
         holder.handleText.setText(currentTweet.handle)
         holder.contentText.setText(currentTweet.content)
 
-        // ... iconUrl will come in a future lecture ...
+        if (currentTweet.iconUrl.isNotEmpty()) {
+            // Picasso.get().setIndicatorsEnabled(true)
+
+            Picasso
+                .get()
+                .load(currentTweet.iconUrl)
+                .into(holder.icon)
+        }
     }
 
     // How many rows (total) do you want the adapter to render?

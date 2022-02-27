@@ -1,7 +1,10 @@
 package edu.gwu.androidtweetsspring2022
 
+import android.util.Base64
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import org.json.JSONArray
@@ -22,7 +25,32 @@ class TwitterManager {
         okHttpClient = builder.build()
     }
 
-    fun retrieveTweets(latitude: Double, longitude: Double, apiKey: String): List<Tweet> {
+    fun retrieveOAuthToken(apiKey: String, apiSecret: String): String {
+        val concatenatedSecrets = "$apiKey:$apiSecret"
+        val base64Encoded = Base64.encodeToString(concatenatedSecrets.toByteArray(), Base64.NO_WRAP)
+
+        val requestBody = "grant_type=client_credentials".toRequestBody(
+            contentType = "application/x-www-form-urlencoded".toMediaType()
+        )
+
+        val request = Request.Builder()
+            .url("https://api.twitter.com/oauth2/token")
+            .header("Authorization", "Basic $base64Encoded")
+            .post(requestBody)
+            .build()
+
+        val response = okHttpClient.newCall(request).execute()
+        val responseBody = response.body?.string()
+
+        if (response.isSuccessful && !responseBody.isNullOrEmpty()) {
+            val json = JSONObject(responseBody)
+            return json.getString("access_token")
+        }
+
+        return ""
+    }
+
+    fun retrieveTweets(latitude: Double, longitude: Double, oAuthToken: String): List<Tweet> {
         val radius = "30mi"
         val searchQuery = "Android"
 
@@ -30,7 +58,7 @@ class TwitterManager {
         // The "Authorization" header here is similar to an API Key... we'll see with Lecture 7.
         val request: Request = Request.Builder()
             .url("https://api.twitter.com/1.1/search/tweets.json?q=$searchQuery&geocode=$latitude,$longitude,$radius")
-            .header("Authorization", "Bearer AAAAAAAAAAAAAAAAAAAAAJ6N8QAAAAAABppHnTpssd0Hrsdpsi6vYN%2BTfks%3DFY1iVemJdKF5HWRZhQnHRbGpwXJevg3sYyvYC3R53sHCfOJvFk")
+            .header("Authorization", "Bearer $oAuthToken")
             .get()
             .build()
 
