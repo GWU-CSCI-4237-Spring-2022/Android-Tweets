@@ -2,7 +2,12 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
+
+    // New way to do:
+    // apply plugin: 'com.google.gms.google-services'
+    id 'com.google.gms.google-services'
 }
+
 
 android {
     compileSdk 31
@@ -46,6 +51,10 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.3'
     implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation platform('com.google.firebase:firebase-bom:29.1.0')
+    implementation 'com.google.firebase:firebase-analytics'
+    implementation 'com.google.firebase:firebase-auth-ktx'
+    implementation 'com.google.firebase:firebase-database-ktx'
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
