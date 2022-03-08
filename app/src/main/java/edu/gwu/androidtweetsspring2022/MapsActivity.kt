@@ -17,6 +17,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.button.MaterialButton
+import com.google.firebase.auth.FirebaseAuth
 import edu.gwu.androidtweetsspring2022.databinding.ActivityMapsBinding
 import org.jetbrains.anko.doAsync
 
@@ -35,6 +36,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        title = getString(R.string.maps_title, currentUser!!.email)
 
         currentLocation = findViewById(R.id.current_location)
         confirm = findViewById(R.id.confirm)
