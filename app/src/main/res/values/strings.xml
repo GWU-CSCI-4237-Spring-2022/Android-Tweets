@@ -18,4 +18,6 @@
     <string name="signup_failure_weak_password">Your password does not meet minimum requirements! Must be at least 6 characters long.</string>
     <string name="signup_failure_already_exists">An account already exists for this email!</string>
     <string name="signup_failure_invalid_format">You must supply a valid formatted email!</string>
+    <string name="tweets_firebase_title">Android Tweets in %1$s</string>
+    <string name="failed_to_retrieve_tweets">Failed to retrieve Tweets</string>
 </resources>

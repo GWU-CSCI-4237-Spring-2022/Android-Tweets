@@ -13,7 +13,10 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.*
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 
 class MainActivity : AppCompatActivity() {
 
@@ -31,6 +34,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var firebaseAuth: FirebaseAuth
 
+    private lateinit var firebaseAnalytics: FirebaseAnalytics
+
     // onCreate is called the first time the Activity is to be shown to the user, so it a good spot
     // to put initialization logic.
     // https://developer.android.com/guide/components/activities/activity-lifecycle
@@ -41,6 +46,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         firebaseAuth = FirebaseAuth.getInstance()
+        firebaseAnalytics = FirebaseAnalytics.getInstance(this)
 
         val sharedPrefs: SharedPreferences =
             getSharedPreferences("android-tweets", Context.MODE_PRIVATE)
@@ -72,6 +78,9 @@ class MainActivity : AppCompatActivity() {
         //
         // This code block will run when the button is clicked (assuming the button is enabled).
         login.setOnClickListener { view: View ->
+
+            firebaseAnalytics.logEvent("login_button_clicked", null)
+
             val inputtedUsername: String = username.text.toString()
             val inputtedPassword: String = password.text.toString()
 
@@ -83,6 +92,8 @@ class MainActivity : AppCompatActivity() {
                     progressBar.visibility = View.INVISIBLE
 
                     if (task.isSuccessful) {
+                        firebaseAnalytics.logEvent("login_success", null)
+
                         val user = firebaseAuth.currentUser
                         Toast.makeText(this, "Logged in as ${user!!.email}", Toast.LENGTH_LONG).show()
 
@@ -106,9 +117,17 @@ class MainActivity : AppCompatActivity() {
                     } else {
                         val exception = task.exception
 
+                        if (exception != null) {
+                            Firebase.crashlytics.recordException(exception)
+                        }
+
                         // A when-statement is like a switch / case statement in Java
                         when (exception) {
                             is FirebaseAuthInvalidUserException -> {
+                                val bundle = Bundle()
+                                bundle.putString("reason", "no_registered_account")
+                                firebaseAnalytics.logEvent("login_failed", bundle)
+
                                 Toast.makeText(
                                     this,
                                     R.string.login_failure_doesnt_exist,
@@ -116,6 +135,10 @@ class MainActivity : AppCompatActivity() {
                                 ).show()
                             }
                             is FirebaseAuthInvalidCredentialsException -> {
+                                val bundle = Bundle()
+                                bundle.putString("reason", "invalid_credentials")
+                                firebaseAnalytics.logEvent("login_failed", bundle)
+
                                 Toast.makeText(
                                     this,
                                     R.string.login_failure_wrong_credentials,
@@ -123,6 +146,10 @@ class MainActivity : AppCompatActivity() {
                                 ).show()
                             }
                             else -> {
+                                val bundle = Bundle()
+                                bundle.putString("reason", "generic")
+                                firebaseAnalytics.logEvent("login_failed", bundle)
+
                                 Toast.makeText(
                                     this,
                                     getString(R.string.login_failure_generic, exception),
@@ -140,20 +167,30 @@ class MainActivity : AppCompatActivity() {
 
             progressBar.visibility = View.VISIBLE
 
+            firebaseAnalytics.logEvent("signup_clicked", null)
+
             firebaseAuth
                 .createUserWithEmailAndPassword(inputtedUsername, inputtedPassword)
                 .addOnCompleteListener { task ->
                     progressBar.visibility = View.INVISIBLE
 
                     if (task.isSuccessful) {
+                        firebaseAnalytics.logEvent("signup_success", null)
                         val user = firebaseAuth.currentUser
                         Toast.makeText(this, "Successfully registered as ${user!!.email}", Toast.LENGTH_LONG).show()
                     } else {
                         val exception = task.exception
 
+                        if (exception != null) {
+                            Firebase.crashlytics.recordException(exception)
+                        }
+
                         // A when-statement is like a switch / case statement in Java
                         when (exception) {
                             is FirebaseAuthWeakPasswordException -> {
+                                val bundle = Bundle()
+                                bundle.putString("reason", "weak_password")
+                                firebaseAnalytics.logEvent("signup_failed", bundle)
                                 Toast.makeText(
                                     this,
                                     R.string.signup_failure_weak_password,
@@ -161,6 +198,9 @@ class MainActivity : AppCompatActivity() {
                                 ).show()
                             }
                             is FirebaseAuthUserCollisionException -> {
+                                val bundle = Bundle()
+                                bundle.putString("reason", "existing_account")
+                                firebaseAnalytics.logEvent("signup_failed", bundle)
                                 Toast.makeText(
                                     this,
                                     R.string.signup_failure_already_exists,
@@ -168,6 +208,9 @@ class MainActivity : AppCompatActivity() {
                                 ).show()
                             }
                             is FirebaseAuthInvalidCredentialsException -> {
+                                val bundle = Bundle()
+                                bundle.putString("reason", "invalid_credentials")
+                                firebaseAnalytics.logEvent("signup_failed", bundle)
                                 Toast.makeText(
                                     this,
                                     R.string.signup_failure_invalid_format,
@@ -175,6 +218,9 @@ class MainActivity : AppCompatActivity() {
                                 ).show()
                             }
                             else -> {
+                                val bundle = Bundle()
+                                bundle.putString("reason", "generic")
+                                firebaseAnalytics.logEvent("signup_failed", bundle)
                                 Toast.makeText(
                                     this,
                                     getString(R.string.signup_failure_generic, exception),
