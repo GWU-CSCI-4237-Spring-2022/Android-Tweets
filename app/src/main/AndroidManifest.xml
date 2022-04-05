@@ -17,6 +17,7 @@
         <activity
             android:name=".MapsActivity"
             android:exported="false"
+            android:parentActivityName=".MainActivity"
             android:label="@string/title_activity_maps" />
 
         <activity
@@ -30,7 +31,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".TweetsActivity" />
+        <activity
+            android:name=".TweetsActivity"
+            android:parentActivityName=".MapsActivity" />
 
         <!-- Normally the "AIza..." key would be part of local.properties or a Strings.xml file, as
              the instructions state. Hardcoding it in this file is an easy way for me to share the key

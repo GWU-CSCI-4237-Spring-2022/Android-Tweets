@@ -2,8 +2,8 @@ package edu.gwu.androidtweetsspring2022
 
 import android.location.Address
 import android.os.Bundle
-import android.renderscript.Sampler
 import android.util.Log
+import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -33,6 +33,8 @@ class TweetsActivity : AppCompatActivity() {
 
     private lateinit var firebaseAnalytics: FirebaseAnalytics
 
+    private val currentTweets: MutableList<Tweet> = mutableListOf()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_tweets)
@@ -49,11 +51,32 @@ class TweetsActivity : AppCompatActivity() {
         addTweet = findViewById(R.id.add_tweet)
         tweetContent = findViewById(R.id.tweet_content)
 
-        // getTweetsFromTwitter(address)
-        getTweetsFromFirebase(address)
+        if (savedInstanceState != null) {
+            addTweet.hide()
+            tweetContent.visibility = View.GONE
+
+            currentTweets.addAll(savedInstanceState.getSerializable("tweets") as List<Tweet>)
+            val adapter = TweetAdapter(currentTweets)
+            recyclerView.adapter = adapter
+            recyclerView.layoutManager = LinearLayoutManager(this@TweetsActivity)
+        } else {
+            // First time activity is being displayed
+            getTweetsFromTwitter(address)
+//        getTweetsFromFirebase(address)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        val serializableList = ArrayList(currentTweets)
+        outState.putSerializable("tweets", serializableList)
     }
 
     private fun getTweetsFromTwitter(address: Address) {
+        addTweet.hide()
+        tweetContent.visibility = View.GONE
+
         // getString(R.string.my_id) allows us to read a value from strings.xml.
         // You can supply additional data parameters if that string has any placeholders that need filling.
         val title: String = getString(R.string.tweets_title, address.getAddressLine(0))
@@ -78,6 +101,9 @@ class TweetsActivity : AppCompatActivity() {
                 firebaseAnalytics.logEvent("twitter_failed", null)
                 listOf<Tweet>()
             }
+
+            currentTweets.clear()
+            currentTweets.addAll(tweets)
 
             runOnUiThread {
                 if (tweets.isNotEmpty()) {

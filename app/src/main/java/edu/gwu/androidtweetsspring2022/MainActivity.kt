@@ -1,8 +1,14 @@
 package edu.gwu.androidtweetsspring2022
 
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.location.Address
+import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Editable
@@ -13,10 +19,14 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.ProgressBar
 import android.widget.Toast
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.TaskStackBuilder
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.*
 import com.google.firebase.crashlytics.ktx.crashlytics
 import com.google.firebase.ktx.Firebase
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -44,6 +54,8 @@ class MainActivity : AppCompatActivity() {
 
         // Tells Android which layout file should be used for this screen.
         setContentView(R.layout.activity_main)
+
+        createNotificationChannel()
 
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
@@ -175,6 +187,8 @@ class MainActivity : AppCompatActivity() {
                     progressBar.visibility = View.INVISIBLE
 
                     if (task.isSuccessful) {
+                        showNotification()
+                        
                         firebaseAnalytics.logEvent("signup_success", null)
                         val user = firebaseAuth.currentUser
                         Toast.makeText(this, "Successfully registered as ${user!!.email}", Toast.LENGTH_LONG).show()
@@ -241,6 +255,57 @@ class MainActivity : AppCompatActivity() {
         // Default to the empty string if there is no saved username.
         val savedUsername = sharedPrefs.getString("USERNAME", "")
         username.setText(savedUsername)
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val title = "Default Notification"
+            val description = "All notifications will be posted under this type!"
+            val id = "default"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+
+            val notificationChannel = NotificationChannel(id, title, importance)
+            notificationChannel.description = description
+
+            val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notificationManager.createNotificationChannel(notificationChannel)
+        }
+    }
+
+    private fun showNotification() {
+        val mainActivityIntent = Intent(this, MainActivity::class.java)
+        mainActivityIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+
+        val pendingMainActivityIntent = PendingIntent.getActivity(this, 0, mainActivityIntent, 0)
+
+        val tweetsActivityIntent = Intent(this, TweetsActivity::class.java)
+
+        val fakeAddress = Address(Locale.getDefault())
+        fakeAddress.latitude = 37.54
+        fakeAddress.longitude = -77.43
+        fakeAddress.locality = "Richmond"
+        fakeAddress.adminArea = "Virginia"
+
+        tweetsActivityIntent.putExtra("address", fakeAddress)
+
+        val taskStackBuilder = TaskStackBuilder.create(this)
+        taskStackBuilder.addNextIntentWithParentStack(tweetsActivityIntent)
+
+        val stackPendingIntent = taskStackBuilder.getPendingIntent(0, 0)
+
+        // Create notification
+        val notification: Notification =
+            NotificationCompat.Builder(this, "default")
+                .setContentTitle("Welcome to Android Tweets")
+                .setContentText("Click this notification to open the app!")
+                .setSmallIcon(R.drawable.ic_check)
+                .setContentIntent(pendingMainActivityIntent)
+                .setAutoCancel(true)
+                .addAction(0, "Go to Virginia", stackPendingIntent)
+                .build()
+
+        // Show notification to user
+        NotificationManagerCompat.from(this).notify(0, notification)
     }
 
     // Another example of explicitly implementing an interface (TextWatcher). We cannot use
