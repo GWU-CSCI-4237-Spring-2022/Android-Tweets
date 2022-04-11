@@ -31,7 +31,13 @@ import com.google.firebase.ktx.Firebase
 import edu.gwu.androidtweetsspring2022.databinding.ActivityMapsBinding
 import org.jetbrains.anko.doAsync
 
+
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
+
+    object Constants {
+        public val INTENT_KEY_ADDRESS = "address"
+
+    }
 
     private var currentAddress: Address? = null
 
@@ -44,6 +50,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var firebaseAnalytics: FirebaseAnalytics
 
     private lateinit var locationProvider: FusedLocationProviderClient
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,7 +72,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             firebaseAnalytics.logEvent("confirm_clicked", null)
             if (currentAddress != null) {
                 val tweetsIntent = Intent(this, TweetsActivity::class.java)
-                tweetsIntent.putExtra("address", currentAddress)
+                tweetsIntent.putExtra(Constants.INTENT_KEY_ADDRESS, currentAddress)
                 startActivity(tweetsIntent)
             }
         }

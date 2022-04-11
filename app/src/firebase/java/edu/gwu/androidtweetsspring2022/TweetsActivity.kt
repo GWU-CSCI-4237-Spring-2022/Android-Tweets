@@ -43,58 +43,13 @@ class TweetsActivity : AppCompatActivity() {
         // Retrieves the data associated with the "LOCATION" key from the Intent used to launch
         // this Activity (the one we created in the MainActivity)
         // val location: String = getIntent().getStringExtra("LOCATION")!!
-        val address: Address = getIntent().getParcelableExtra("address")!!
+        val address: Address = getIntent().getParcelableExtra(MapsActivity.Constants.INTENT_KEY_ADDRESS)!!
 
         recyclerView = findViewById(R.id.recyclerView)
         addTweet = findViewById(R.id.add_tweet)
         tweetContent = findViewById(R.id.tweet_content)
 
-        // getTweetsFromTwitter(address)
-        getTweetsFromFirebase(address)
-    }
-
-    private fun getTweetsFromTwitter(address: Address) {
-        // getString(R.string.my_id) allows us to read a value from strings.xml.
-        // You can supply additional data parameters if that string has any placeholders that need filling.
-        val title: String = getString(R.string.tweets_title, address.getAddressLine(0))
-
-        // Set the screen title
-        setTitle(title)
-
-        val twitterManager = TwitterManager()
-        val apiKey = getString(R.string.twitter_api_key)
-        val apiSecret = getString(R.string.twitter_api_secret)
-
-        // Networking needs to be done on a background thread
-        doAsync {
-            // Use our TwitterManager to get Tweets from the Twitter API. If there is network
-            // connection issues, the catch-block will fire and we'll show the user an error message.
-            val tweets: List<Tweet> = try {
-                val oAuthToken: String = twitterManager.retrieveOAuthToken(apiKey, apiSecret)
-                twitterManager.retrieveTweets(address.latitude,address.longitude, oAuthToken)
-            } catch(exception: Exception) {
-                Log.e("TweetsActivity", "Retrieving Tweets failed", exception)
-                Firebase.crashlytics.recordException(exception)
-                firebaseAnalytics.logEvent("twitter_failed", null)
-                listOf<Tweet>()
-            }
-
-            runOnUiThread {
-                if (tweets.isNotEmpty()) {
-                    firebaseAnalytics.logEvent("twitter_success", null)
-                    val adapter = TweetAdapter(tweets)
-                    recyclerView.adapter = adapter
-                    recyclerView.layoutManager = LinearLayoutManager(this@TweetsActivity)
-                } else {
-                    firebaseAnalytics.logEvent("no_tweets", null)
-                    Toast.makeText(
-                        this@TweetsActivity,
-                        R.string.failed_to_retrieve_tweets,
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            }
-        }
+         getTweetsFromFirebase(address)
     }
 
     private fun getTweetsFromFirebase(address: Address) {

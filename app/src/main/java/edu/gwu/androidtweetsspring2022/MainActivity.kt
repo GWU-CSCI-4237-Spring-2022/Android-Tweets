@@ -84,6 +84,11 @@ class MainActivity : AppCompatActivity() {
             val inputtedUsername: String = username.text.toString()
             val inputtedPassword: String = password.text.toString()
 
+            if (BuildConfig.DEBUG) {
+                Log.d("MainActivity", "Username $inputtedUsername")
+                Log.d("MainActivity", "Password $inputtedPassword")
+            }
+
             progressBar.visibility = View.VISIBLE
 
             firebaseAuth
