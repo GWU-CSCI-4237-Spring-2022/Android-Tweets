@@ -36,6 +36,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var firebaseAnalytics: FirebaseAnalytics
 
+    private lateinit var shakeManager: ShakeManager
+
     // onCreate is called the first time the Activity is to be shown to the user, so it a good spot
     // to put initialization logic.
     // https://developer.android.com/guide/components/activities/activity-lifecycle
@@ -47,6 +49,7 @@ class MainActivity : AppCompatActivity() {
 
         firebaseAuth = FirebaseAuth.getInstance()
         firebaseAnalytics = FirebaseAnalytics.getInstance(this)
+        shakeManager = ShakeManager(this)
 
         val sharedPrefs: SharedPreferences =
             getSharedPreferences("android-tweets", Context.MODE_PRIVATE)
@@ -241,6 +244,20 @@ class MainActivity : AppCompatActivity() {
         // Default to the empty string if there is no saved username.
         val savedUsername = sharedPrefs.getString("USERNAME", "")
         username.setText(savedUsername)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Start shake detection
+        shakeManager.startDetectingShakes {
+            Log.d("MainActivity", "Shake detected!")
+        }
+    }
+
+    override fun onPause() {
+        // Stop shake detection
+        shakeManager.stopDetectingShakes()
+        super.onPause()
     }
 
     // Another example of explicitly implementing an interface (TextWatcher). We cannot use
